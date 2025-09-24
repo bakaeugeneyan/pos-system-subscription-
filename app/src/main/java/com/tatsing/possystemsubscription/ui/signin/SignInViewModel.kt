@@ -5,6 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tatsing.possystemsubscription.base.NetworkResult
 import com.tatsing.possystemsubscription.base.isNetworkAvailable
+import com.tatsing.possystemsubscription.data.entities.user.UserEntity
+import com.tatsing.possystemsubscription.data.entities.user.toUserResponse
+import com.tatsing.possystemsubscription.domain.model.login.toDB
+import com.tatsing.possystemsubscription.domain.repository.local.user.UserRepository
 import com.tatsing.possystemsubscription.domain.usecase.SignInUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -17,8 +21,9 @@ import javax.inject.Inject
 @HiltViewModel
 class SignInViewModel @Inject constructor(
     private val signInUseCase: SignInUseCase,
+    private val userRepository: UserRepository,
     @ApplicationContext private val context: Context
-): ViewModel(){
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SignInUiState())
     val uiState: StateFlow<SignInUiState> = _uiState.asStateFlow()
@@ -29,12 +34,33 @@ class SignInViewModel @Inject constructor(
             val isConnected = isNetworkAvailable(context)
 
             if (isConnected) {
-                signInUseCase.signInWithEmail(SignInUseCase.Field(email = email, password = password))
+                signInUseCase.signInWithEmail(
+                    SignInUseCase.Field(
+                        email = email,
+                        password = password
+                    )
+                )
                     .collect { result ->
                         when (result) {
 
                             is NetworkResult.Loading -> {
+                                val userData = result.data?.user
                                 _uiState.value = _uiState.value.copy(isLoading = true)
+
+                                val userEntity = userData?.toDB()?.copy(
+                                    email = email,
+                                    password = password
+                                )
+
+                                if (userEntity != null) {
+                                    val existingUser = userRepository.getUsers()
+
+                                    if (existingUser != null) {
+                                        userRepository.deleteUser(existingUser)
+                                    }
+
+                                    insertUser(userEntity = userEntity)
+                                }
                             }
 
                             is NetworkResult.Success -> {
@@ -51,8 +77,30 @@ class SignInViewModel @Inject constructor(
                         }
                     }
             } else {
+                // Offline fallback: fetch from DB
+                val localUser = userRepository.getUsers()
 
+                try {
+                    if (localUser.email == email && localUser.password == password) {
+                        val userResponse = localUser.toUserResponse()
+                        _uiState.value = _uiState.value.copy(user = userResponse)
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            errorMsg = "Invalid username or password. Please try again."
+                        )
+                    }
+                } catch (e: Exception) {
+                    _uiState.value = _uiState.value.copy(
+                        errorMsg = "No local data available. Please connect to the internet."
+                    )
+                }
             }
+        }
+    }
+
+    private fun insertUser(userEntity: UserEntity) {
+        viewModelScope.launch {
+            userRepository.insertUser(userEntity)
         }
     }
 

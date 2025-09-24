@@ -2,6 +2,7 @@ package com.tatsing.possystemsubscription.domain.model.login
 
 
 import com.google.gson.annotations.SerializedName
+import com.tatsing.possystemsubscription.data.entities.user.UserEntity
 
 data class User(
     @SerializedName("app_metadata")
@@ -33,3 +34,22 @@ data class User(
     @SerializedName("user_metadata")
     val userMetadata: UserMetadata
 )
+
+fun User.toDB(): UserEntity {
+    return UserEntity(
+        appMetadataEntity = appMetadata.toEntity(),
+        aud = aud,
+        confirmedAt = confirmedAt,
+        createdAt = createdAt,
+        email = email,
+        emailConfirmedAt = emailConfirmedAt,
+        id = id,
+        identitiesEntity = identities.map { it.toEntity() },
+        isAnonymous = isAnonymous,
+        lastSignInAt = lastSignInAt,
+        phone = phone,
+        role = role,
+        updatedAt = updatedAt,
+        userMetadataEntity = userMetadata.toEntity()
+    )
+}

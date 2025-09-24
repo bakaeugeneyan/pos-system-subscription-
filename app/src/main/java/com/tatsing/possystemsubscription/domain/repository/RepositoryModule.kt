@@ -1,5 +1,7 @@
 package com.tatsing.possystemsubscription.domain.repository
 
+import com.tatsing.possystemsubscription.domain.repository.local.user.UserRepository
+import com.tatsing.possystemsubscription.domain.repository.local.user.UserRepositoryImpl
 import com.tatsing.possystemsubscription.domain.repository.remote.login.SignInRepository
 import com.tatsing.possystemsubscription.domain.repository.remote.login.SignInRepositoryImpl
 import dagger.Binds
@@ -14,4 +16,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindSignInRepository(source: SignInRepositoryImpl): SignInRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUserLocalRepository(source: UserRepositoryImpl): UserRepository
 }
