@@ -36,6 +36,9 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 
+#icons extend
+androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+
 #hilt
 hilt-android = { group = "com.google.dagger", name="hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { group = "com.google.dagger", name="hilt-android-compiler", version.ref = "hilt" }

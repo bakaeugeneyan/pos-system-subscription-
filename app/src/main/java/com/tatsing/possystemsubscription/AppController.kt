@@ -7,6 +7,6 @@ import dagger.hilt.android.HiltAndroidApp
 class AppController:Application() {
 	override fun onCreate() {
 		super.onCreate()
-//		AppAuth.initialize(applicationContext)
+		AppAuth.initialize(applicationContext)
 	}
 }

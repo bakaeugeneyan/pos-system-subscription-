@@ -31,6 +31,27 @@ android {
                 "proguard-rules.pro"
             )
         }
+
+        debug {
+            /** Staging Development **/
+            applicationIdSuffix = ".debug"
+            resValue(
+                type = "string",
+                name = "app_name_variant",
+                value = "[Staging] ${project.findProperty("APP_NAME")}"
+            )
+            buildConfigField(
+                type = "String",
+                name = "HOST",
+                value = "${project.findProperty("BASE_URL_INTERNAL")}"
+            )
+
+            buildConfigField(
+                type = "String",
+                name = "API_KEY_ANON",
+                value = "${project.findProperty("API_KEY_ANON")}"
+            )
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -41,6 +62,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -69,6 +91,9 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    //icons extend
+    implementation(libs.androidx.material.icons.extended)
 
     // hilt
     implementation(libs.hilt.android)
