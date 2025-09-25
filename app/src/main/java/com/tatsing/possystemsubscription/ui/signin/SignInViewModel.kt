@@ -1,6 +1,7 @@
 package com.tatsing.possystemsubscription.ui.signin
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tatsing.possystemsubscription.base.NetworkResult
@@ -44,9 +45,14 @@ class SignInViewModel @Inject constructor(
                         when (result) {
 
                             is NetworkResult.Loading -> {
-                                val userData = result.data?.user
                                 _uiState.value = _uiState.value.copy(isLoading = true)
+                            }
 
+                            is NetworkResult.Success -> {
+                                val userData = result.data?.user
+                                _uiState.value = _uiState.value.copy(user = userData)
+
+                                // Save user to DB after success
                                 val userEntity = userData?.toDB()?.copy(
                                     email = email,
                                     password = password
@@ -54,18 +60,11 @@ class SignInViewModel @Inject constructor(
 
                                 if (userEntity != null) {
                                     val existingUser = userRepository.getUsers()
-
                                     if (existingUser != null) {
                                         userRepository.deleteUser(existingUser)
                                     }
-
-                                    insertUser(userEntity = userEntity)
+                                    insertUser(userEntity)
                                 }
-                            }
-
-                            is NetworkResult.Success -> {
-                                val userData = result.data?.user
-                                _uiState.value = _uiState.value.copy(user = userData)
                             }
 
                             is NetworkResult.Error -> {
